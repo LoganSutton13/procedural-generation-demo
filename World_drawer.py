@@ -11,6 +11,9 @@ class WorldDrawer:
         self.world = world
         self.clock = pygame.time.Clock()
         
+        # Initialize font for text input
+        self.font = pygame.font.Font(None, 32)
+        
         # Color mapping for terrain types
         self.terrain_colors = {
             OCEAN3: (0, 0, 139),    # Dark blue
@@ -28,6 +31,13 @@ class WorldDrawer:
         # Create cached surface for the world
         self.world_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.world_changed = True  # Flag to track if world needs redrawing
+        
+        # Text input properties
+        self.input_text = ""
+        self.input_active = False
+        self.input_rect = pygame.Rect(10, 50, 200, 32)  # Moved down from y=10 to y=50
+        self.cursor_visible = True
+        self.cursor_timer = 0
 
     def draw(self):
         # Only redraw the world if it has changed
@@ -38,6 +48,10 @@ class WorldDrawer:
         # Clear screen and blit the cached world surface
         self.screen.fill((0, 0, 0))
         self.screen.blit(self.world_surface, (0, 0))
+        
+        # Draw text input UI
+        self.draw_text_input()
+        
         pygame.display.flip()
 
     def redraw_world(self):
@@ -91,6 +105,65 @@ class WorldDrawer:
         else:
             return SNOW
 
+    def draw_text_input(self):
+        """Draw the text input field and UI"""
+        # Draw input box background
+        color = (255, 255, 255) if self.input_active else (128, 128, 128)
+        pygame.draw.rect(self.screen, color, self.input_rect, 2)
+        
+        # Draw input box fill
+        pygame.draw.rect(self.screen, (0, 0, 0), self.input_rect)
+        pygame.draw.rect(self.screen, color, self.input_rect, 2)
+        
+        # Render the text
+        text_surface = self.font.render(self.input_text, True, (255, 255, 255))
+        self.screen.blit(text_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
+        
+        # Draw cursor if active
+        if self.input_active and self.cursor_visible:
+            cursor_x = self.input_rect.x + 5 + self.font.size(self.input_text)[0]
+            cursor_rect = pygame.Rect(cursor_x, self.input_rect.y + 5, 2, 22)
+            pygame.draw.rect(self.screen, (255, 255, 255), cursor_rect)
+        
+        # Draw label
+        label_surface = self.font.render("Seed:", True, (255, 255, 255))
+        self.screen.blit(label_surface, (self.input_rect.x, self.input_rect.y - 25))
+        
+        # Draw instructions
+        instruction_font = pygame.font.Font(None, 24)
+        instructions = [
+            "Click to enter seed, ENTER to generate, SPACE for random",
+            "ESC to exit"
+        ]
+        for i, instruction in enumerate(instructions):
+            inst_surface = instruction_font.render(instruction, True, (200, 200, 200))
+            self.screen.blit(inst_surface, (10, WINDOW_HEIGHT - 60 + i * 20))
+
+    def handle_text_input(self, event):
+        """Handle text input events"""
+        if event.type == pygame.KEYDOWN:
+            if self.input_active:
+                if event.key == pygame.K_RETURN:
+                    # Generate world with entered seed
+                    try:
+                        seed = int(self.input_text)
+                        self.world = World(WORLD_X, WORLD_Y, seed)
+                        self.world_changed = True
+                        print(f"Generated world with seed: {seed}")
+                        self.input_text = ""
+                        self.input_active = False
+                    except ValueError:
+                        print("Please enter a valid number")
+                elif event.key == pygame.K_BACKSPACE:
+                    self.input_text = self.input_text[:-1]
+                elif event.key == pygame.K_ESCAPE:
+                    self.input_active = False
+                    self.input_text = ""
+                elif event.unicode.isnumeric():
+                    # Only allow numbers
+                    if len(self.input_text) < 10:  # Limit to 10 digits
+                        self.input_text += event.unicode
+
     def run(self):
         """Main game loop"""
         running = True
@@ -98,13 +171,31 @@ class WorldDrawer:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # Check if mouse clicked on input box
+                    if self.input_rect.collidepoint(event.pos):
+                        self.input_active = True
+                    else:
+                        self.input_active = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        running = False
-                    if event.key == pygame.K_SPACE:
+                        if self.input_active:
+                            self.input_active = False
+                            self.input_text = ""
+                        else:
+                            running = False
+                    elif event.key == pygame.K_SPACE and not self.input_active:
                         self.world = World(WORLD_X, WORLD_Y, random.randint(1, 10000))
-                        self.world_changed = True  # Mark that world needs redrawing
+                        self.world_changed = True
                         print("New world generated")
+                    else:
+                        self.handle_text_input(event)
+            
+            # Update cursor blinking
+            self.cursor_timer += 1
+            if self.cursor_timer >= 30:  # Blink every 30 frames (1 second at 30 FPS)
+                self.cursor_visible = not self.cursor_visible
+                self.cursor_timer = 0
             
             self.draw()
             self.clock.tick(30)  # 30 FPS
