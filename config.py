@@ -1,6 +1,6 @@
 WINDOW_WIDTH    = 1000
 WINDOW_HEIGHT   = 1000
-TILESIZE        = 4       # tile width/height in pixels in tilesheet
+TILESIZE        = 4      # tile width/height in pixels in tilesheet
 WORLD_X         = (WINDOW_WIDTH + TILESIZE - 1) // TILESIZE
 WORLD_Y         = (WINDOW_HEIGHT + TILESIZE - 1) // TILESIZE
 

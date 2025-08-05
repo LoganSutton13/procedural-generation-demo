@@ -185,9 +185,10 @@ class WorldDrawer:
                         else:
                             running = False
                     elif event.key == pygame.K_SPACE and not self.input_active:
-                        self.world = World(WORLD_X, WORLD_Y, random.randint(1, 10000))
+                        seed = random.randint(1, 999999999)
+                        self.world = World(WORLD_X, WORLD_Y, seed)
                         self.world_changed = True
-                        print("New world generated")
+                        print("New random world generated. Seed: ", seed)
                     else:
                         self.handle_text_input(event)
             
