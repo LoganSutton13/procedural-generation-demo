@@ -17,8 +17,11 @@ class WorldDrawer:
             OCEAN2: (0, 0, 205),    # Medium blue
             OCEAN1: (0, 191, 255),  # Light blue
             BEACH: (238, 214, 175), # Sand color
-            GRASS: (34, 139, 34),   # Forest green
-            MOUNTAIN: (139, 69, 19), # Brown
+            GRASS1:  (11, 176, 30), # Lighter green
+            GRASS2: (42, 156, 48), # Light green
+            GRASS3: (34, 139, 34), # Forest green
+            MOUNTAIN1: (139, 69, 19), # Brown
+            MOUNTAIN2: (84, 82, 82), # Gray
             SNOW: (255, 250, 250)   # White
         }
         
@@ -75,10 +78,16 @@ class WorldDrawer:
             return OCEAN1
         elif normalized_value < 0.35:
             return BEACH
-        elif normalized_value < 0.7:
-            return GRASS
-        elif normalized_value < 0.9:
-            return MOUNTAIN
+        elif normalized_value < 0.55:
+            return GRASS1
+        elif normalized_value < 0.6:
+            return GRASS2
+        elif normalized_value < 0.65:
+            return GRASS3
+        elif normalized_value < 0.83:
+            return MOUNTAIN1
+        elif normalized_value < 0.90:
+            return MOUNTAIN2
         else:
             return SNOW
 

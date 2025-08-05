@@ -12,6 +12,7 @@ class World:
         self.max_value = max(self.linear_map)
 
     def generate_noisemap(self, size_x, size_y, seed): 
+        """ Generate a noise map using Perlin Noise"""
         self.noise_map = []
 
         octave_factor = 2
@@ -37,4 +38,5 @@ class World:
             self.noise_map.append(row)
 
     def get_noise_map(self):
+        """ Get the noise map"""
         return self.noise_map
