@@ -1,5 +1,7 @@
 from config import *
 import pygame
+import random
+from World import World
 
 class WorldDrawer:
     def __init__(self, world):
@@ -47,8 +49,6 @@ class WorldDrawer:
             rect = pygame.Rect(x * TILESIZE, y * TILESIZE, TILESIZE, TILESIZE)
             pygame.draw.rect(self.screen, color, rect)
             
-            # Draw grid lines (optional)
-            pygame.draw.rect(self.screen, (50, 50, 50), rect, 1)
 
     def get_terrain_type(self, normalized_value):
         """Map normalized noise value (0-1) to terrain type"""
@@ -74,9 +74,12 @@ class WorldDrawer:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
+                    if event.type == pygame.K_SPACE:
+                        self.world = World(WORLD_X, WORLD_Y, random.randint(1, 10000))
             
             self.draw()
             self.clock.tick(60)  # 60 FPS
