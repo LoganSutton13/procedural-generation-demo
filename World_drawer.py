@@ -21,17 +21,32 @@ class WorldDrawer:
             MOUNTAIN: (139, 69, 19), # Brown
             SNOW: (255, 250, 250)   # White
         }
+        
+        # Create cached surface for the world
+        self.world_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.world_changed = True  # Flag to track if world needs redrawing
 
     def draw(self):
-        self.screen.fill((0, 0, 0))  # Clear screen with black
+        # Only redraw the world if it has changed
+        if self.world_changed:
+            self.redraw_world()
+            self.world_changed = False
+        
+        # Clear screen and blit the cached world surface
+        self.screen.fill((0, 0, 0))
+        self.screen.blit(self.world_surface, (0, 0))
+        pygame.display.flip()
+
+    def redraw_world(self):
+        """Redraw the entire world to the cached surface"""
+        self.world_surface.fill((0, 0, 0))
         
         for y in range(WORLD_Y):
             for x in range(WORLD_X):
-                self.draw_tile(x, y)
-        
-        pygame.display.flip()
+                self.draw_tile_to_surface(x, y)
 
-    def draw_tile(self, x, y):
+    def draw_tile_to_surface(self, x, y):
+        """Draw a tile to the cached world surface"""
         # Get noise value for this position
         if y < len(self.world.noise_map) and x < len(self.world.noise_map[y]):
             noise_value = self.world.noise_map[y][x]
@@ -45,9 +60,9 @@ class WorldDrawer:
             # Get color for this terrain type
             color = self.terrain_colors.get(terrain_type, (128, 128, 128))
             
-            # Draw the tile
+            # Draw the tile to the cached surface
             rect = pygame.Rect(x * TILESIZE, y * TILESIZE, TILESIZE, TILESIZE)
-            pygame.draw.rect(self.screen, color, rect)
+            pygame.draw.rect(self.world_surface, color, rect)
             
 
     def get_terrain_type(self, normalized_value):
@@ -74,14 +89,15 @@ class WorldDrawer:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-                    if event.type == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE:
                         self.world = World(WORLD_X, WORLD_Y, random.randint(1, 10000))
+                        self.world_changed = True  # Mark that world needs redrawing
+                        print("New world generated")
             
             self.draw()
-            self.clock.tick(60)  # 60 FPS
+            self.clock.tick(30)  # 30 FPS
         
         pygame.quit()
