@@ -188,7 +188,7 @@ class WorldDrawer:
                         seed = random.randint(1, 999999999)
                         self.world = World(WORLD_X, WORLD_Y, seed)
                         self.world_changed = True
-                        print("New random world generated. Seed: ", seed)
+                        print("New random world generated. Seed:", seed)
                     else:
                         self.handle_text_input(event)
             
