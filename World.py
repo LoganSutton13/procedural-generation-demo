@@ -24,6 +24,8 @@ class World:
         noise4 = PerlinNoise(octaves=octave_base * octave_factor ** 3, seed=seed)
 
         xpix, ypix = size_x + 1, size_y + 1
+
+        # Generate 2D noise map
         for y in range(ypix):
             row = []
             for x in range(xpix):
